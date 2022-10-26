@@ -22,7 +22,7 @@ private:
     int prod, cons;
 
     mutex mux;
-    queue<thread::id> q;
+    queue<thread::id> QC, QP; // queue consumidor, queue produtor...
 
     // métodos block/wakeup implementados no slide
     void block();
@@ -40,7 +40,7 @@ public:
     int consumir();
 
     void into_map(thread::id id);
-    void debug();
+    void debug(bool is_produce);
 };
 
 #endif
