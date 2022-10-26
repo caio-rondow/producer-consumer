@@ -1,9 +1,9 @@
 #include "limBuffer.h"
-#define MAX_VALUE 100 // produz valores de 0 a 99
+#define MAX_VALUE 10 // produz valores de 0 a 99
 
 void consume(LimBuffer &buffer){ buffer.consumir(); }
 
-void produce(LimBuffer &buffer){ buffer.produzir(rand()%MAX_VALUE); }
+void produce(LimBuffer &buffer){ buffer.produzir(1); }
 
 bool solve(LimBuffer &buffer, vector<thread>&threads, char t){
     
