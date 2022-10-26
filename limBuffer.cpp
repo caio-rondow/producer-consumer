@@ -7,7 +7,7 @@ LimBuffer::LimBuffer(int _capacity): capacity(_capacity), size(0), prod(0), cons
     
     // Aloca buffer de tamanho capacity
     buffer = new int[capacity];
-    for(int i=0; i<capacity; i++) buffer[i]=-1;
+    for(int i=0; i<capacity; i++) buffer[i]=0;
 }
 
 // Desaloca buffer
@@ -46,7 +46,7 @@ void LimBuffer::produzir(int data){
         // Se o buffer está cheio...
         if(size==capacity){
             blk=true;                       // marcar para thread esperar
-            q.push(this_thread::get_id());  // colocar na fila de espera
+            QP.push(this_thread::get_id());  // colocar na fila de espera
 
         } else{
 
@@ -56,13 +56,13 @@ void LimBuffer::produzir(int data){
             size++;
 
             // acorda thread
-            if(!q.empty()){ 
-                thread::id id=q.front(); q.pop();
+            if(!QC.empty()){ 
+                thread::id id=QC.front(); QC.pop();
                 wakeup(id);
             }
 
             // Imprime estado do buffer
-            debug();
+            debug(1);
         }
 
         // FINAL REGIÃO CRÍTICA
@@ -84,26 +84,26 @@ int LimBuffer::consumir(){
         mux.lock();
 
         // Se o buffer está vazio...
-        if(size==NULL){
+        if(size==0){
             blk=true;                       // marcar para thread esperar
-            q.push(this_thread::get_id());  // colocar na fila de espera
+            QC.push(this_thread::get_id());  // colocar na fila de espera
 
         } else{
 
             // Tira dado do buffer
             ans=buffer[cons];
-            buffer[cons]=-1;
+            buffer[cons]=0;
             cons=(cons+1)%capacity;
             size--;
 
             // acorda thread
-            if(!q.empty()){
-                thread::id id=q.front(); q.pop();
+            if(!QP.empty()){
+                thread::id id=QP.front(); QP.pop();
                 wakeup(id);
             }
 
             // Imprime estado do buffer
-            debug();
+            debug(0);
         }
 
         // FINAL REGIÃO CRÍTICA
@@ -117,8 +117,8 @@ int LimBuffer::consumir(){
 
 void LimBuffer::into_map(thread::id id){ A.insert(make_pair(id,0)); }
 
-void LimBuffer::debug(){
+void LimBuffer::debug(bool is_produce){
     cout << "Buffer: [ ";
     for(int i=0; i<capacity; i++) cout << buffer[i] << " ";
-    cout << "]\n";
+    cout << (is_produce ? "] produce" : "] consume") << "\n";
 }
